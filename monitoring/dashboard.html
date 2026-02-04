@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temu Data Infrastructure - Real-Time Dashboard</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-card h3 {
+            color: #667eea;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .metric-change {
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .positive { color: #4ade80; }
+        .negative { color: #f87171; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .table-card h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="status-indicator"></span>
+                Temu Data Infrastructure Dashboard
+            </h1>
+            <p>Real-time monitoring of Nigeria launch data infrastructure</p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #999;">
+                Last updated: <span id="lastUpdate">--</span>
+            </p>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Events Processed</h3>
+                <div class="metric-value" id="totalEvents">0</div>
+                <div class="metric-label">Total events since start</div>
+                <div class="metric-change" id="eventsPerSecond">0 events/sec</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>API Latency (P95)</h3>
+                <div class="metric-value" id="latencyP95">0ms</div>
+                <div class="metric-label">95th percentile response time</div>
+                <div class="metric-change positive" id="latencyStatus">Within SLA</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Error Rate</h3>
+                <div class="metric-value" id="errorRate">0%</div>
+                <div class="metric-label">Failed requests percentage</div>
+                <div class="metric-change" id="errorStatus">--</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Active Users</h3>
+                <div class="metric-value" id="activeUsers">0</div>
+                <div class="metric-label">Current active users</div>
+                <div class="metric-change positive" id="userGrowth">Growing</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Orders Today</h3>
+                <div class="metric-value" id="orders">0</div>
+                <div class="metric-label">Completed orders</div>
+                <div class="metric-change positive" id="orderTrend">+12% vs yesterday</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Revenue (NGN)</h3>
+                <div class="metric-value" id="revenue">₦0</div>
+                <div class="metric-label">Total revenue</div>
+                <div class="metric-change positive" id="revenueTrend">+8% vs yesterday</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>CPU Usage</h3>
+                <div class="metric-value" id="cpuUsage">0%</div>
+                <div class="metric-label">Average CPU utilization</div>
+                <div class="metric-change" id="cpuStatus">--</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Cache Hit Rate</h3>
+                <div class="metric-value" id="cacheHitRate">0%</div>
+                <div class="metric-label">Redis cache efficiency</div>
+                <div class="metric-change positive" id="cacheStatus">Optimal</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Events Per Second (Real-Time)</h3>
+                <canvas id="eventsChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Latency Distribution</h3>
+                <canvas id="latencyChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Events by Topic</h3>
+                <canvas id="topicsChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Infrastructure Health</h3>
+                <canvas id="infraChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="table-card">
+            <h3>Top Products</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Sales</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="topProducts">
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <h3>Top Cities by User Activity</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>Active Users</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="topCities">
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io('http://localhost:3000');
+
+        // Chart configurations
+        const eventsChart = new Chart(document.getElementById('eventsChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Events/sec',
+                    data: [],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                animation: { duration: 0 }
+            }
+        });
+
+        const latencyChart = new Chart(document.getElementById('latencyChart'), {
+            type: 'bar',
+            data: {
+                labels: ['P50', 'P95', 'P99'],
+                datasets: [{
+                    label: 'Latency (ms)',
+                    data: [0, 0, 0],
+                    backgroundColor: ['#4ade80', '#fbbf24', '#f87171']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const topicsChart = new Chart(document.getElementById('topicsChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['User Events', 'Transactions', 'Marketing', 'Infrastructure'],
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: ['#667eea', '#4ade80', '#fbbf24', '#f87171']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+        const infraChart = new Chart(document.getElementById('infraChart'), {
+            type: 'radar',
+            data: {
+                labels: ['CPU', 'Memory', 'Cache', 'Database', 'Network'],
+                datasets: [{
+                    label: 'Utilization %',
+                    data: [0, 0, 0, 0, 0],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Update dashboard with new metrics
+        socket.on('metrics', (data) => {
+            const { processor, infrastructure, business } = data;
+
+            // Update key metrics
+            document.getElementById('totalEvents').textContent = processor.totalEvents.toLocaleString();
+            document.getElementById('eventsPerSecond').textContent = `${processor.eventsPerSecond.toFixed(2)} events/sec`;
+            document.getElementById('latencyP95').textContent = `${processor.latency.p95}ms`;
+            document.getElementById('errorRate').textContent = `${processor.errorRate.toFixed(3)}%`;
+            document.getElementById('activeUsers').textContent = business.activeUsers.toLocaleString();
+            document.getElementById('orders').textContent = business.orders.toLocaleString();
+            document.getElementById('revenue').textContent = `₦${business.revenue.toLocaleString()}`;
+            document.getElementById('cpuUsage').textContent = `${infrastructure.cpuUsage.toFixed(1)}%`;
+            document.getElementById('cacheHitRate').textContent = `${infrastructure.cacheHitRate.toFixed(1)}%`;
+
+            // Update status indicators
+            document.getElementById('latencyStatus').textContent = processor.latency.p95 < 200 ? 'Within SLA' : 'Warning';
+            document.getElementById('latencyStatus').className = processor.latency.p95 < 200 ? 'metric-change positive' : 'metric-change negative';
+            
+            document.getElementById('errorStatus').textContent = processor.errorRate < 1 ? 'Healthy' : 'Alert';
+            document.getElementById('errorStatus').className = processor.errorRate < 1 ? 'metric-change positive' : 'metric-change negative';
+
+            document.getElementById('cpuStatus').textContent = infrastructure.cpuUsage < 80 ? 'Normal' : 'High';
+            document.getElementById('cpuStatus').className = infrastructure.cpuUsage < 80 ? 'metric-change positive' : 'metric-change negative';
+
+            // Update charts
+            const now = new Date().toLocaleTimeString();
+            eventsChart.data.labels.push(now);
+            eventsChart.data.datasets[0].data.push(processor.eventsPerSecond);
+            if (eventsChart.data.labels.length > 20) {
+                eventsChart.data.labels.shift();
+                eventsChart.data.datasets[0].data.shift();
+            }
+            eventsChart.update('none');
+
+            latencyChart.data.datasets[0].data = [
+                processor.latency.p50,
+                processor.latency.p95,
+                processor.latency.p99
+            ];
+            latencyChart.update();
+
+            topicsChart.data.datasets[0].data = [
+                processor.eventsByTopic.userEvents,
+                processor.eventsByTopic.transactionEvents,
+                processor.eventsByTopic.marketingEvents,
+                processor.eventsByTopic.infrastructureEvents
+            ];
+            topicsChart.update();
+
+            infraChart.data.datasets[0].data = [
+                infrastructure.cpuUsage,
+                infrastructure.memoryUsage,
+                infrastructure.cacheHitRate,
+                (infrastructure.databaseConnections / 10),
+                (100 - infrastructure.errorRate * 10)
+            ];
+            infraChart.update();
+
+            // Update tables
+            const productsHtml = business.topProducts.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.sales.toLocaleString()}</td>
+                    <td><span class="badge badge-success">Active</span></td>
+                </tr>
+            `).join('');
+            document.getElementById('topProducts').innerHTML = productsHtml;
+
+            const citiesHtml = business.topCities.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.users.toLocaleString()}</td>
+                    <td><span class="badge badge-success">Growing</span></td>
+                </tr>
+            `).join('');
+            document.getElementById('topCities').innerHTML = citiesHtml;
+
+            // Update timestamp
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        });
+
+        // Handle connection errors
+        socket.on('connect_error', (error) => {
+            console.error('Connection error:', error);
+            document.getElementById('lastUpdate').textContent = 'Connection lost. Reconnecting...';
+        });
+    </script>
+</body>
+</html>

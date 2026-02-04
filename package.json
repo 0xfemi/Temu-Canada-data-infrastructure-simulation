@@ -1,0 +1,28 @@
+{
+  "name": "temu-data-infrastructure-simulation",
+  "version": "1.0.0",
+  "description": "Simulation of Temu's data infrastructure preparation for Nigeria launch",
+  "main": "index.js",
+  "scripts": {
+    "pipeline": "node pipelines/real-time-processor.js",
+    "dashboard": "node monitoring/dashboard-server.js",
+    "stress-test": "node infrastructure/load-generator.js",
+    "ab-test": "node analytics/ab-testing.js",
+    "batch": "node pipelines/batch-processor.js",
+    "demo": "node demo.js",
+    "start": "concurrently \"npm run pipeline\" \"npm run dashboard\""
+  },
+  "keywords": [
+    "data-infrastructure",
+    "simulation",
+    "streaming",
+    "analytics"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "concurrently": "^8.2.2"
+  }
+}
