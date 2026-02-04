@@ -26,7 +26,7 @@ class LoadGenerator {
     // Start load test
     async startLoadTest(profile = 'normal') {
         if (this.isRunning) {
-            console.log('⚠️  Load test already running');
+            console.log('WARNING: Load test already running');
             return;
         }
 
@@ -34,7 +34,7 @@ class LoadGenerator {
         this.currentLoadProfile = profile;
         const config = this.loadProfiles[profile];
 
-        console.log(`\n🚀 Starting load test: ${profile}`);
+        console.log(`\nStarting load test: ${profile}`);
         console.log(`   Events/sec: ${config.eventsPerSecond}`);
         console.log(`   Duration: ${config.duration === Infinity ? 'Indefinite' : config.duration + 'ms'}\n`);
 
@@ -47,7 +47,7 @@ class LoadGenerator {
             const scalingChanges = this.scaler.scale(metrics.eventsPerSecond);
             
             if (Object.keys(scalingChanges).length > 0) {
-                console.log('\n📈 Auto-scaling triggered:');
+                console.log('\nAuto-scaling triggered:');
                 Object.keys(scalingChanges).forEach(component => {
                     const change = scalingChanges[component];
                     console.log(`   ${component}: ${change.from} → ${change.to} (${change.change > 0 ? '+' : ''}${change.change})`);
@@ -75,7 +75,7 @@ class LoadGenerator {
                     return;
                 }
                 currentRate += config.increment;
-                console.log(`\n📊 Increasing load to ${currentRate} events/sec`);
+                console.log(`\nIncreasing load to ${currentRate} events/sec`);
                 this.processor.stop();
                 this.processor = new RealTimeProcessor();
                 this.processor.start(currentRate);
@@ -98,7 +98,7 @@ class LoadGenerator {
 
         this.isRunning = false;
         this.processor.stop();
-        console.log('\n⏹️  Load test stopped');
+        console.log('\nLoad test stopped');
 
         // Print final report
         this.printFinalReport();
@@ -107,7 +107,7 @@ class LoadGenerator {
     // Log current status
     logStatus(metrics) {
         const state = this.scaler.getState();
-        console.log('\n📊 Current Status:');
+        console.log('\nCurrent Status:');
         console.log(`   Events/sec: ${metrics.eventsPerSecond.toFixed(2)}`);
         console.log(`   Total events: ${metrics.totalEvents.toLocaleString()}`);
         console.log(`   Latency P95: ${metrics.latency.p95}ms`);
@@ -125,7 +125,7 @@ class LoadGenerator {
         const state = this.scaler.getState();
 
         console.log('\n' + '='.repeat(60));
-        console.log('📋 LOAD TEST FINAL REPORT');
+        console.log('LOAD TEST FINAL REPORT');
         console.log('='.repeat(60));
         console.log(`\nProfile: ${this.currentLoadProfile}`);
         console.log(`\nPerformance Metrics:`);
@@ -162,7 +162,7 @@ class LoadGenerator {
 
     // Run multiple load profiles sequentially
     async runStressTest() {
-        console.log('\n🔥 Starting comprehensive stress test...\n');
+        console.log('\nStarting comprehensive stress test...\n');
 
         const profiles = ['normal', 'spike', 'sustained', 'gradual', 'chaos'];
         
@@ -188,11 +188,11 @@ class LoadGenerator {
             });
 
             // Wait between tests
-            console.log('\n⏸️  Waiting 5 seconds before next test...');
+            console.log('\nWaiting 5 seconds before next test...');
             await new Promise(resolve => setTimeout(resolve, 5000));
         }
 
-        console.log('\n✅ Stress test completed!\n');
+        console.log('\nStress test completed!\n');
     }
 }
 

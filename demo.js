@@ -20,19 +20,19 @@ class DataInfrastructureDemo {
     // Run complete demo
     async runDemo() {
         console.log('\n' + '='.repeat(70));
-        console.log('🚀 TEMU NIGERIA LAUNCH - DATA INFRASTRUCTURE SIMULATION');
+        console.log('TEMU NIGERIA LAUNCH - DATA INFRASTRUCTURE SIMULATION');
         console.log('='.repeat(70));
         console.log('\nThis simulation demonstrates what Temu\'s data infrastructure');
         console.log('preparation might have looked like before launching in Nigeria.\n');
 
         // Initialize components
-        console.log('📦 Initializing infrastructure components...');
+        console.log('Initializing infrastructure components...');
         this.batchProcessor.initializeJobs();
         this.abTesting.initializeLaunchExperiments();
-        console.log('✅ All components initialized\n');
+        console.log('All components initialized\n');
 
         // Start real-time processing
-        console.log('🔄 Starting real-time data processing...');
+        console.log('Starting real-time data processing...');
         this.processor.start(100); // 100 events/second
 
         // Start monitoring loop
@@ -40,13 +40,13 @@ class DataInfrastructureDemo {
 
         // Simulate A/B testing traffic
         setTimeout(() => {
-            console.log('\n🧪 Starting A/B testing traffic simulation...');
+            console.log('\nStarting A/B testing traffic simulation...');
             this.abTesting.simulateTraffic(60000); // 1 minute
         }, 5000);
 
         // Run batch jobs after 30 seconds
         setTimeout(async () => {
-            console.log('\n📅 Running scheduled batch jobs...');
+            console.log('\nRunning scheduled batch jobs...');
             await this.batchProcessor.runScheduledJobs();
         }, 30000);
 
@@ -74,7 +74,7 @@ class DataInfrastructureDemo {
 
             // Display metrics every 15 seconds
             console.log('\n' + '-'.repeat(70));
-            console.log('📊 REAL-TIME METRICS');
+            console.log('REAL-TIME METRICS');
             console.log('-'.repeat(70));
             console.log(`Events Processed: ${metrics.totalEvents.toLocaleString()}`);
             console.log(`Events/sec: ${metrics.eventsPerSecond.toFixed(2)}`);
@@ -93,7 +93,7 @@ class DataInfrastructureDemo {
             console.log(`\nEstimated Cost: $${state.totalCost.hourly.toFixed(2)}/hour`);
 
             if (Object.keys(scalingChanges).length > 0) {
-                console.log(`\n📈 Auto-scaling triggered:`);
+                console.log(`\nAuto-scaling triggered:`);
                 Object.keys(scalingChanges).forEach(component => {
                     const change = scalingChanges[component];
                     console.log(`  ${component}: ${change.from} → ${change.to}`);
@@ -103,7 +103,7 @@ class DataInfrastructureDemo {
             // Display A/B test results
             const experiments = this.abTesting.platform.listExperiments();
             if (experiments.length > 0) {
-                console.log(`\n🧪 A/B Tests Running: ${experiments.length}`);
+                console.log(`\nA/B Tests Running: ${experiments.length}`);
             }
 
         }, 15000);
@@ -111,7 +111,7 @@ class DataInfrastructureDemo {
 
     // Stop demo
     stopDemo() {
-        console.log('\n\n🛑 Shutting down simulation...');
+        console.log('\n\nShutting down simulation...');
         this.processor.stop();
         this.isRunning = false;
 
@@ -129,16 +129,16 @@ class DataInfrastructureDemo {
         const experiments = this.abTesting.platform.listExperiments();
 
         console.log('\n' + '='.repeat(70));
-        console.log('📋 SIMULATION SUMMARY');
+        console.log('SIMULATION SUMMARY');
         console.log('='.repeat(70));
 
-        console.log('\n📊 Real-Time Processing:');
+        console.log('\nReal-Time Processing:');
         console.log(`   Total Events: ${metrics.totalEvents.toLocaleString()}`);
         console.log(`   Avg Events/sec: ${metrics.eventsPerSecond.toFixed(2)}`);
         console.log(`   Latency P95: ${metrics.latency.p95}ms`);
         console.log(`   Error Rate: ${metrics.errorRate.toFixed(3)}%`);
 
-        console.log('\n🏗️  Infrastructure:');
+        console.log('\nInfrastructure:');
         console.log(`   API Servers: ${state.instances.apiServers}`);
         console.log(`   Database Replicas: ${state.instances.databaseReplicas}`);
         console.log(`   Kafka Brokers: ${state.instances.kafkaBrokers}`);
@@ -146,20 +146,20 @@ class DataInfrastructureDemo {
         console.log(`   Cache Nodes: ${state.instances.cacheNodes}`);
         console.log(`   Scaling Events: ${state.scaler?.scalingHistory?.length || 0}`);
 
-        console.log('\n💰 Cost Estimate:');
+        console.log('\nCost Estimate:');
         console.log(`   Hourly: $${state.totalCost.hourly.toFixed(2)}`);
         console.log(`   Daily: $${state.totalCost.daily.toFixed(2)}`);
         console.log(`   Monthly: $${state.totalCost.monthly.toFixed(2)}`);
 
-        console.log('\n📅 Batch Jobs:');
+        console.log('\nBatch Jobs:');
         jobs.forEach(job => {
-            const status = job.status === 'completed' ? '✅' : 
-                         job.status === 'running' ? '🔄' : 
-                         job.status === 'failed' ? '❌' : '⏸️';
+            const status = job.status === 'completed' ? '[OK]' : 
+                         job.status === 'running' ? '[RUNNING]' : 
+                         job.status === 'failed' ? '[FAILED]' : '[PENDING]';
             console.log(`   ${status} ${job.name}`);
         });
 
-        console.log('\n🧪 A/B Tests:');
+        console.log('\nA/B Tests:');
         experiments.forEach(exp => {
             console.log(`   ${exp.name} (${exp.status})`);
         });

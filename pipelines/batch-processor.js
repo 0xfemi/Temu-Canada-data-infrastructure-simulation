@@ -101,7 +101,7 @@ class BatchProcessor {
 
         job.status = 'running';
         job.startTime = Date.now();
-        console.log(`\n🔄 Starting job: ${job.name}`);
+        console.log(`\nStarting job: ${job.name}`);
 
         const results = {
             jobId: job.id,
@@ -129,7 +129,7 @@ class BatchProcessor {
                     status: 'completed'
                 });
 
-                console.log(`   ✅ Completed in ${stepDuration}ms`);
+                console.log(`   Completed in ${stepDuration}ms`);
             }
 
             job.status = 'completed';
@@ -137,7 +137,7 @@ class BatchProcessor {
             results.endTime = new Date().toISOString();
             results.duration = Date.now() - job.startTime;
 
-            console.log(`\n✅ Job completed: ${job.name} (${(results.duration / 1000).toFixed(2)}s)`);
+            console.log(`\nJob completed: ${job.name} (${(results.duration / 1000).toFixed(2)}s)`);
 
         } catch (error) {
             job.status = 'failed';
@@ -147,7 +147,7 @@ class BatchProcessor {
             results.endTime = new Date().toISOString();
             results.duration = Date.now() - job.startTime;
 
-            console.log(`\n❌ Job failed: ${job.name} - ${error.message}`);
+            console.log(`\nJob failed: ${job.name} - ${error.message}`);
         }
 
         this.jobHistory.push(results);
@@ -185,7 +185,7 @@ class BatchProcessor {
 
     // Run all scheduled jobs
     async runScheduledJobs() {
-        console.log('\n📅 Running scheduled batch jobs...\n');
+        console.log('\nRunning scheduled batch jobs...\n');
         
         const jobsToRun = Array.from(this.jobs.values()).filter(job => 
             job.status === 'pending' || job.status === 'failed'
@@ -203,7 +203,7 @@ class BatchProcessor {
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
 
-        console.log('\n✅ All scheduled jobs completed\n');
+        console.log('\nAll scheduled jobs completed\n');
     }
 
     // Get job status
@@ -242,7 +242,7 @@ class BatchProcessor {
     // Simulate daily batch processing
     async simulateDailyProcessing() {
         console.log('\n' + '='.repeat(70));
-        console.log('🌙 SIMULATING DAILY BATCH PROCESSING');
+        console.log('SIMULATING DAILY BATCH PROCESSING');
         console.log('='.repeat(70));
 
         this.initializeJobs();
@@ -251,12 +251,12 @@ class BatchProcessor {
         await this.runScheduledJobs();
 
         // Print summary
-        console.log('\n📊 Batch Processing Summary:');
+        console.log('\nBatch Processing Summary:');
         const allJobs = this.getAllJobsStatus();
         allJobs.forEach(job => {
-            const status = job.status === 'completed' ? '✅' : 
-                         job.status === 'running' ? '🔄' : 
-                         job.status === 'failed' ? '❌' : '⏸️';
+            const status = job.status === 'completed' ? '[OK]' : 
+                         job.status === 'running' ? '[RUNNING]' : 
+                         job.status === 'failed' ? '[FAILED]' : '[PENDING]';
             console.log(`   ${status} ${job.name}: ${job.status}`);
         });
 

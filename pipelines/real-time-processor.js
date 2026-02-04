@@ -175,7 +175,7 @@ class RealTimeProcessor extends EventEmitter {
     // Start processing
     start(eventsPerSecond = 100) {
         this.isRunning = true;
-        console.log(`🚀 Starting real-time processor (${eventsPerSecond} events/sec)...`);
+        console.log(`Starting real-time processor (${eventsPerSecond} events/sec)...`);
         
         const interval = 1000 / eventsPerSecond;
         
@@ -202,7 +202,7 @@ class RealTimeProcessor extends EventEmitter {
         if (this.metricsInterval) {
             clearInterval(this.metricsInterval);
         }
-        console.log('\n⏹️  Processor stopped');
+        console.log('\nProcessor stopped');
     }
 
     // Calculate and log metrics
@@ -234,7 +234,7 @@ class RealTimeProcessor extends EventEmitter {
             errors: this.metrics.errors
         };
 
-        console.log('\n📊 Real-Time Processor Metrics:');
+        console.log('\nReal-Time Processor Metrics:');
         console.log(JSON.stringify(metrics, null, 2));
         
         // Emit metrics for dashboard
@@ -274,7 +274,7 @@ if (require.main === module) {
     
     // Handle graceful shutdown
     process.on('SIGINT', () => {
-        console.log('\n\n🛑 Shutting down...');
+        console.log('\n\nShutting down...');
         processor.stop();
         process.exit(0);
     });

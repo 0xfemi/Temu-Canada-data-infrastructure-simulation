@@ -2,7 +2,7 @@
 
 This document explains how each component of the Temu data infrastructure simulation works.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The simulation consists of 6 main components that work together:
 
@@ -199,7 +199,7 @@ Variants:
   - Control (Current): 50 users, 15 conversions (30%)
   - Variant A (Localized): 52 users, 20 conversions (38.5%)
   
-Result: Variant A has 8.5% lift, 95% confidence ✅
+Result: Variant A has 8.5% lift, 95% confidence [YES]
 ```
 
 ---
@@ -244,7 +244,7 @@ Daily ETL Pipeline:
   Step 5: generate_reports (1.8 min)
   
 Total: 9.45 minutes
-Status: ✅ Completed
+Status: [OK] Completed
 ```
 
 ---
@@ -311,7 +311,7 @@ class DataInfrastructureDemo {
 
 ---
 
-## 🔄 Data Flow
+## Data Flow
 
 ```
 User Actions (Simulated)
@@ -344,7 +344,7 @@ Batch Processor
 
 ---
 
-## 📊 Key Metrics Explained
+## Key Metrics Explained
 
 ### Latency Percentiles
 - **P50 (Median)**: 50% of requests complete in this time
@@ -369,7 +369,7 @@ Batch Processor
 
 ---
 
-## 🎯 Real-World Equivalents
+## Real-World Equivalents
 
 | Simulation Component | Real Technology |
 |---------------------|----------------|
@@ -382,7 +382,7 @@ Batch Processor
 
 ---
 
-## 🚀 Running the Simulation
+## Running the Simulation
 
 1. **Start Dashboard:**
    ```bash
@@ -406,7 +406,7 @@ Batch Processor
 
 ---
 
-## 💡 Key Insights
+## Key Insights
 
 1. **Event-Driven Architecture**: Everything is an event that flows through the system
 2. **Auto-Scaling**: Infrastructure adapts automatically to load

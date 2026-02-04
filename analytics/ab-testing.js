@@ -31,7 +31,7 @@ class ABTestingPlatform {
         };
 
         this.experiments.set(experimentId, experiment);
-        console.log(`✅ Created experiment: ${name} (${experimentId})`);
+        console.log(`Created experiment: ${name} (${experimentId})`);
         return experiment;
     }
 
@@ -227,7 +227,7 @@ class ABTestingPlatform {
         if (experiment) {
             experiment.status = 'stopped';
             experiment.endDate = new Date().toISOString();
-            console.log(`⏹️  Stopped experiment: ${experiment.name}`);
+            console.log(`Stopped experiment: ${experiment.name}`);
         }
     }
 
@@ -252,7 +252,7 @@ class ABTestingSimulator {
 
     // Simulate Nigeria launch experiments
     initializeLaunchExperiments() {
-        console.log('\n🧪 Initializing A/B tests for Nigeria launch...\n');
+        console.log('\nInitializing A/B tests for Nigeria launch...\n');
 
         // Experiment 1: Homepage Design
         this.platform.createExperiment(
@@ -286,7 +286,7 @@ class ABTestingSimulator {
             ['click_through_rate', 'conversion_rate', 'revenue']
         );
 
-        console.log('✅ All experiments initialized\n');
+        console.log('All experiments initialized\n');
     }
 
     // Simulate traffic and conversions
@@ -296,7 +296,7 @@ class ABTestingSimulator {
         }
 
         this.isRunning = true;
-        console.log(`\n🚀 Simulating traffic for ${duration / 1000} seconds...\n`);
+        console.log(`\nSimulating traffic for ${duration / 1000} seconds...\n`);
 
         const experiments = Array.from(this.platform.experiments.keys());
         let eventCount = 0;
@@ -342,7 +342,7 @@ class ABTestingSimulator {
         setTimeout(() => {
             clearInterval(interval);
             this.isRunning = false;
-            console.log('\n✅ Simulation completed\n');
+            console.log('\nSimulation completed\n');
             this.printFinalResults();
         }, duration);
     }
@@ -354,14 +354,14 @@ class ABTestingSimulator {
         experiments.forEach(exp => {
             const results = this.platform.getResults(exp.id);
             if (results && results.variants.length > 0) {
-                console.log(`\n📊 ${exp.name}:`);
+                console.log(`\n${exp.name}:`);
                 results.variants.forEach(variant => {
                     console.log(`   ${variant.name}: ${variant.traffic} users, ${variant.conversionRate.toFixed(2)}% conversion`);
                 });
                 
                 if (results.statisticalSignificance) {
                     const sig = results.statisticalSignificance;
-                    console.log(`   Significance: ${sig.significant ? '✅' : '❌'} (${sig.confidence}% confidence, ${sig.lift.toFixed(1)}% lift)`);
+                    console.log(`   Significance: ${sig.significant ? '[YES]' : '[NO]'} (${sig.confidence}% confidence, ${sig.lift.toFixed(1)}% lift)`);
                 }
             }
         });
@@ -370,7 +370,7 @@ class ABTestingSimulator {
     // Print final results
     printFinalResults() {
         console.log('\n' + '='.repeat(70));
-        console.log('📋 FINAL A/B TEST RESULTS');
+        console.log('FINAL A/B TEST RESULTS');
         console.log('='.repeat(70));
 
         const experiments = this.platform.listExperiments();
@@ -378,7 +378,7 @@ class ABTestingSimulator {
         experiments.forEach(exp => {
             const results = this.platform.getResults(exp.id);
             if (results) {
-                console.log(`\n🧪 ${exp.name}`);
+                console.log(`\n${exp.name}`);
                 console.log(`   Status: ${exp.status} | Duration: ${results.experiment.duration} minutes`);
                 console.log('\n   Variant Results:');
                 
@@ -395,7 +395,7 @@ class ABTestingSimulator {
                 if (results.statisticalSignificance) {
                     const sig = results.statisticalSignificance;
                     console.log(`\n   Statistical Analysis:`);
-                    console.log(`      Significant: ${sig.significant ? '✅ YES' : '❌ NO'}`);
+                    console.log(`      Significant: ${sig.significant ? '[YES]' : '[NO]'}`);
                     console.log(`      Confidence: ${sig.confidence}%`);
                     console.log(`      Lift: ${sig.lift > 0 ? '+' : ''}${sig.lift.toFixed(2)}%`);
                     console.log(`      Z-Score: ${sig.zScore.toFixed(2)}`);

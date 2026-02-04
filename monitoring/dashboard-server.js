@@ -104,7 +104,7 @@ const businessMetrics = new BusinessMetrics();
 
 // WebSocket connection handling
 io.on('connection', (socket) => {
-    console.log('📊 Client connected to dashboard');
+    console.log('Client connected to dashboard');
     
     // Send initial data
     const initialData = {
@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
     socket.emit('metrics', initialData);
 
     socket.on('disconnect', () => {
-        console.log('📊 Client disconnected from dashboard');
+        console.log('Client disconnected from dashboard');
     });
 });
 
@@ -138,16 +138,16 @@ processor.start(100);
 // Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`\n🚀 Monitoring Dashboard Server running on http://localhost:${PORT}`);
-    console.log(`📊 Open dashboard.html in your browser to view metrics\n`);
+    console.log(`\nMonitoring Dashboard Server running on http://localhost:${PORT}`);
+    console.log(`Open dashboard.html in your browser to view metrics\n`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-    console.log('\n\n🛑 Shutting down dashboard server...');
+    console.log('\n\nShutting down dashboard server...');
     processor.stop();
     server.close(() => {
-        console.log('✅ Server closed');
+        console.log('Server closed');
         process.exit(0);
     });
 });
