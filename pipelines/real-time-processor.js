@@ -178,13 +178,21 @@ class RealTimeProcessor extends EventEmitter {
         console.log(`Starting real-time processor (${eventsPerSecond} events/sec)...`);
         
         const interval = 1000 / eventsPerSecond;
-        
+        const loopStart = Date.now();
+        let emitted = 0;
+
+        // Timers fire late (~15ms minimum on Windows), so emit however many
+        // events are due since start instead of one per tick
         const processLoop = () => {
             if (!this.isRunning) return;
-            
-            const event = this.generateEvent();
-            this.processEvent(event);
-            
+
+            const due = Math.floor((Date.now() - loopStart) / interval) + 1;
+            while (emitted < due) {
+                const event = this.generateEvent();
+                this.processEvent(event);
+                emitted++;
+            }
+
             setTimeout(processLoop, interval);
         };
 
