@@ -42,6 +42,12 @@ class ABTestingPlatform {
             return null;
         }
 
+        // Returning users keep their variant and are not counted twice
+        const existing = this.variants.get(`${experimentId}_${userId}`);
+        if (existing) {
+            return experiment.variants.find(v => v.id === existing.variantId);
+        }
+
         // Check if user should be in experiment (traffic allocation)
         if (Math.random() > this.trafficAllocation) {
             return null;
@@ -87,11 +93,14 @@ class ABTestingPlatform {
 
         const results = this.results.get(experimentId);
 
-        // Track conversion
-        if (!results.conversions[variant.id]) {
-            results.conversions[variant.id] = 0;
+        // Track conversion (revenue and engagement events are not conversions)
+        if (metric === 'conversion') {
+            if (!results.conversions[variant.id]) {
+                results.conversions[variant.id] = 0;
+            }
+            results.conversions[variant.id] += value;
+            variant.conversions += value;
         }
-        results.conversions[variant.id] += value;
 
         // Track revenue if applicable
         if (metric === 'revenue' || metric === 'purchase') {
@@ -108,8 +117,6 @@ class ABTestingPlatform {
             }
             results.engagement[variant.id] += value;
         }
-
-        variant.conversions += value;
     }
 
     // Get experiment results
@@ -179,6 +186,9 @@ class ABTestingPlatform {
         // Simplified z-test
         const pooledRate = (controlConversions + treatmentConversions) / (controlTraffic + treatmentTraffic);
         const se = Math.sqrt(pooledRate * (1 - pooledRate) * (1/controlTraffic + 1/treatmentTraffic));
+        if (se === 0 || controlRate === 0) {
+            return { significant: false, confidence: 0, lift: 0, zScore: 0 };
+        }
         const z = (treatmentRate - controlRate) / se;
         const confidence = Math.abs(z) > 1.96 ? 95 : Math.abs(z) > 1.645 ? 90 : 0;
 
@@ -342,6 +352,7 @@ class ABTestingSimulator {
         setTimeout(() => {
             clearInterval(interval);
             this.isRunning = false;
+            experiments.forEach(id => this.platform.stopExperiment(id));
             console.log('\nSimulation completed\n');
             this.printFinalResults();
         }, duration);
@@ -387,7 +398,7 @@ class ABTestingSimulator {
                     console.log(`      Traffic: ${variant.traffic.toLocaleString()}`);
                     console.log(`      Conversions: ${variant.conversions.toLocaleString()}`);
                     console.log(`      Conversion Rate: ${variant.conversionRate.toFixed(2)}%`);
-                    console.log(`      Revenue: ₦${variant.revenue.toLocaleString()}`);
+                    console.log(`      Revenue: ₦${variant.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`);
                     console.log(`      Avg Revenue: ₦${variant.averageRevenue.toFixed(2)}`);
                     console.log(`      Engagement: ${variant.engagement.toLocaleString()} (${variant.engagementRate.toFixed(2)}%)`);
                 });
