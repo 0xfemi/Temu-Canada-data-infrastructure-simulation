@@ -1,6 +1,11 @@
 /**
  * Monitoring Dashboard Server
  * Serves real-time metrics dashboard via WebSocket
+ *
+ * Every figure sent to the dashboard comes from the simulation modules:
+ * the event stream (real-time-processor), auto-scaling and cost
+ * (scaling-simulator), A/B experiments (ab-testing) and batch jobs
+ * (batch-processor).
  */
 
 const express = require('express');
@@ -8,6 +13,9 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const RealTimeProcessor = require('../pipelines/real-time-processor');
+const BatchProcessor = require('../pipelines/batch-processor');
+const ScalingSimulator = require('../infrastructure/scaling-simulator');
+const { ABTestingSimulator } = require('../analytics/ab-testing');
 
 const app = express();
 const server = http.createServer(app);
@@ -21,129 +29,165 @@ const io = new Server(server, {
 // Serve static files
 app.use(express.static(path.join(__dirname, '..')));
 
-// Initialize processor
+// Initialize simulation components
 const processor = new RealTimeProcessor();
+const scaler = new ScalingSimulator();
+const launchInstances = { ...scaler.currentInstances };
+const batchProcessor = new BatchProcessor();
+const abTesting = new ABTestingSimulator();
 
-// Simulate additional infrastructure metrics
-class InfrastructureMetrics {
+// Aggregates business analytics from the properties of processed events
+class StreamAnalytics {
     constructor() {
-        this.metrics = {
-            apiLatency: [],
-            errorRate: 0,
-            throughput: 0,
-            cpuUsage: 50,
-            memoryUsage: 60,
-            databaseConnections: 0,
-            cacheHitRate: 95
-        };
+        this.ordersCreated = 0;
+        this.ordersCompleted = 0;
+        this.revenue = 0;
+        this.cities = {};
+        this.paymentMethods = {};
+        this.channels = {};
     }
 
-    update() {
-        // Simulate realistic infrastructure metrics
-        this.metrics.apiLatency.push(Math.random() * 200 + 50);
-        if (this.metrics.apiLatency.length > 100) {
-            this.metrics.apiLatency.shift();
+    record({ event }) {
+        const props = event.properties;
+        const city = this.cities[props.city] || (this.cities[props.city] = { events: 0, orders: 0, revenue: 0 });
+        city.events++;
+
+        switch (event.type) {
+            case 'order.created':
+                this.ordersCreated++;
+                break;
+            case 'order.completed': {
+                const amount = parseFloat(props.amount);
+                this.ordersCompleted++;
+                this.revenue += amount;
+                city.orders++;
+                city.revenue += amount;
+                const method = this.paymentMethods[props.paymentMethod] || (this.paymentMethods[props.paymentMethod] = { orders: 0, revenue: 0 });
+                method.orders++;
+                method.revenue += amount;
+                break;
+            }
+            case 'ad.impression':
+            case 'ad.click': {
+                const channel = this.channels[props.channel] || (this.channels[props.channel] = { impressions: 0, clicks: 0 });
+                if (event.type === 'ad.impression') channel.impressions++;
+                else channel.clicks++;
+                break;
+            }
         }
-        
-        this.metrics.errorRate = Math.random() * 0.5;
-        this.metrics.throughput = processor.getMetrics().eventsPerSecond * 10;
-        this.metrics.cpuUsage = 50 + Math.random() * 30;
-        this.metrics.memoryUsage = 60 + Math.random() * 20;
-        this.metrics.databaseConnections = Math.floor(Math.random() * 1000) + 500;
-        this.metrics.cacheHitRate = 90 + Math.random() * 8;
 
-        return this.metrics;
+        // Each user event is a visit the launch experiments can allocate
+        if (event.topic === 'user-events') {
+            abTesting.simulateVisitor(event.userId);
+        }
     }
-}
 
-const infraMetrics = new InfrastructureMetrics();
+    getMetrics() {
+        const sortBy = (obj, key) => Object.entries(obj)
+            .map(([name, values]) => ({ name, ...values }))
+            .sort((a, b) => b[key] - a[key]);
 
-// Business metrics simulation
-class BusinessMetrics {
-    constructor() {
-        this.metrics = {
-            totalUsers: 0,
-            activeUsers: 0,
-            orders: 0,
-            revenue: 0,
-            conversionRate: 0,
-            averageOrderValue: 0,
-            topProducts: [],
-            topCities: []
+        return {
+            ordersCreated: this.ordersCreated,
+            ordersCompleted: this.ordersCompleted,
+            revenue: this.revenue,
+            averageOrderValue: this.ordersCompleted > 0 ? this.revenue / this.ordersCompleted : 0,
+            cities: sortBy(this.cities, 'events'),
+            paymentMethods: sortBy(this.paymentMethods, 'orders'),
+            channels: sortBy(this.channels, 'impressions').map(c => ({
+                ...c,
+                ctr: c.impressions > 0 ? (c.clicks / c.impressions) * 100 : 0
+            }))
         };
     }
-
-    update(processorMetrics) {
-        // Simulate business metrics based on events
-        this.metrics.totalUsers += Math.floor(Math.random() * 10);
-        this.metrics.activeUsers = Math.floor(processorMetrics.eventsPerSecond * 0.1);
-        // Only orders since the last update add revenue (NGN 1,000 - 6,000 each)
-        const newOrders = processorMetrics.eventsByTopic.transactionEvents - this.metrics.orders;
-        this.metrics.orders = processorMetrics.eventsByTopic.transactionEvents;
-        this.metrics.revenue += newOrders * (Math.random() * 5000 + 1000);
-        this.metrics.conversionRate = (processorMetrics.eventsByTopic.transactionEvents / processorMetrics.eventsByTopic.userEvents) * 100 || 0;
-        this.metrics.averageOrderValue = this.metrics.revenue / this.metrics.orders || 0;
-
-        // Top products (simulated)
-        this.metrics.topProducts = [
-            { name: 'Smartphone', sales: Math.floor(Math.random() * 1000) + 500 },
-            { name: 'Laptop', sales: Math.floor(Math.random() * 800) + 300 },
-            { name: 'Headphones', sales: Math.floor(Math.random() * 600) + 200 }
-        ].sort((a, b) => b.sales - a.sales);
-
-        // Top cities
-        this.metrics.topCities = [
-            { name: 'Lagos', users: Math.floor(Math.random() * 5000) + 2000 },
-            { name: 'Abuja', users: Math.floor(Math.random() * 3000) + 1000 },
-            { name: 'Port Harcourt', users: Math.floor(Math.random() * 2000) + 500 }
-        ].sort((a, b) => b.users - a.users);
-
-        return this.metrics;
-    }
 }
 
-const businessMetrics = new BusinessMetrics();
+const analytics = new StreamAnalytics();
+processor.on('eventProcessed', payload => analytics.record(payload));
+
+function getScalingMetrics() {
+    const state = scaler.getState();
+    return {
+        instances: state.instances,
+        launchInstances,
+        load: state.load,
+        thresholds: scaler.targetMetrics,
+        cost: state.totalCost,
+        recommendations: state.recommendations,
+        scalingEvents: scaler.scalingHistory.length,
+        history: scaler.scalingHistory.slice(-5).reverse()
+    };
+}
+
+function getExperimentResults() {
+    return abTesting.platform.listExperiments().map(exp => {
+        const results = abTesting.platform.getResults(exp.id);
+        return {
+            id: exp.id,
+            name: exp.name,
+            variants: results.variants.map(v => ({
+                name: v.name,
+                traffic: v.traffic,
+                conversions: v.conversions,
+                conversionRate: v.conversionRate
+            })),
+            significance: results.statisticalSignificance
+        };
+    });
+}
+
+function getBatchJobs() {
+    return batchProcessor.getAllJobsStatus().map(job => ({
+        name: job.name,
+        status: job.status,
+        steps: job.steps.length,
+        currentStep: job.currentStep,
+        currentStepName: job.currentStep !== null ? job.steps[job.currentStep] : null,
+        startTime: job.startTime,
+        duration: job.lastRun ? job.lastRun.duration : null
+    }));
+}
+
+function snapshot() {
+    return {
+        processor: processor.getMetrics(),
+        business: analytics.getMetrics(),
+        scaling: getScalingMetrics(),
+        experiments: getExperimentResults(),
+        batch: getBatchJobs(),
+        timestamp: new Date().toISOString()
+    };
+}
 
 // WebSocket connection handling
 io.on('connection', (socket) => {
     console.log('Client connected to dashboard');
-    
+
     // Send initial data
-    const initialData = {
-        processor: processor.getMetrics(),
-        infrastructure: infraMetrics.update(),
-        business: businessMetrics.update(processor.getMetrics())
-    };
-    socket.emit('metrics', initialData);
+    socket.emit('metrics', snapshot());
 
     socket.on('disconnect', () => {
         console.log('Client disconnected from dashboard');
     });
 });
 
-// Listen to processor metrics (the emitted payload is formatted for logging,
-// so send the dashboard the numeric version instead)
+// Each processor metrics tick runs one auto-scaling cycle, then broadcasts
 processor.on('metrics', () => {
-    const metrics = processor.getMetrics();
-    const data = {
-        processor: metrics,
-        infrastructure: infraMetrics.update(),
-        business: businessMetrics.update(metrics),
-        timestamp: new Date().toISOString()
-    };
-    
-    // Broadcast to all connected clients
-    io.emit('metrics', data);
+    scaler.scale(processor.getMetrics().eventsPerSecond);
+    io.emit('metrics', snapshot());
 });
 
-// Start processor
+// Start the simulation
+abTesting.initializeLaunchExperiments();
+batchProcessor.initializeJobs();
 processor.start(100);
+batchProcessor.runScheduledJobs();
 
 // Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`\nMonitoring Dashboard Server running on http://localhost:${PORT}`);
-    console.log(`Open dashboard.html in your browser to view metrics\n`);
+    console.log(`Open http://localhost:${PORT}/monitoring/dashboard.html to view metrics\n`);
 });
 
 // Graceful shutdown

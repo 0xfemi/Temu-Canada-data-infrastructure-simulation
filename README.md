@@ -4,7 +4,7 @@
 
 ![Real-time monitoring dashboard](docs/dashboard.png)
 
-*The live dashboard (`npm run dashboard`) after about 40 seconds at 100 events/sec.*
+*The live dashboard (`npm run dashboard`) after about 50 seconds. Every panel is computed by the project's own modules: business figures from the event stream, cost and instance counts from the auto-scaler, experiment results from the A/B testing platform, and job status from the batch processor. All A/B variants share the same 30% conversion rate, so the "significant" results in the screenshot are false positives from small early samples, the kind of result a real launch team should not act on.*
 
 ## Overview
 

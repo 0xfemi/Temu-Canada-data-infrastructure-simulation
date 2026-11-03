@@ -115,6 +115,7 @@ class BatchProcessor {
         try {
             for (let i = 0; i < job.steps.length; i++) {
                 const step = job.steps[i];
+                job.currentStep = i;
                 console.log(`   Step ${i + 1}/${job.steps.length}: ${step}`);
 
                 const stepStart = Date.now();
@@ -226,6 +227,9 @@ class BatchProcessor {
             name: job.name,
             status: job.status,
             schedule: job.schedule,
+            steps: job.steps,
+            currentStep: job.currentStep ?? null,
+            startTime: job.startTime ?? null,
             lastRun: this.jobHistory
                 .filter(h => h.jobId === job.id)
                 .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))[0] || null

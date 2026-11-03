@@ -299,6 +299,36 @@ class ABTestingSimulator {
         console.log('All experiments initialized\n');
     }
 
+    // Run one visitor through every experiment they are allocated to
+    simulateVisitor(userId) {
+        this.platform.experiments.forEach((experiment, experimentId) => {
+            // Returning users already had their one visit counted
+            const returning = this.platform.variants.has(`${experimentId}_${userId}`);
+            const variant = this.platform.assignVariant(experimentId, userId);
+
+            if (variant && !returning) {
+                // Simulate user behavior
+                const behavior = Math.random();
+
+                // 30% conversion rate
+                if (behavior < 0.3) {
+                    this.platform.trackConversion(experimentId, userId, 'conversion', 1);
+
+                    // 20% make purchase
+                    if (behavior < 0.06) {
+                        const revenue = Math.random() * 50000 + 1000; // NGN 1,000 - 50,000
+                        this.platform.trackConversion(experimentId, userId, 'revenue', revenue);
+                    }
+                }
+
+                // Track engagement
+                if (behavior < 0.7) {
+                    this.platform.trackConversion(experimentId, userId, 'engagement', 1);
+                }
+            }
+        });
+    }
+
     // Simulate traffic and conversions
     simulateTraffic(duration = 60000) {
         if (this.isRunning) {
@@ -313,33 +343,7 @@ class ABTestingSimulator {
 
         const interval = setInterval(() => {
             // Generate random user
-            const userId = `user_${Math.floor(Math.random() * 100000)}`;
-
-            // Randomly assign to experiments
-            experiments.forEach(experimentId => {
-                const variant = this.platform.assignVariant(experimentId, userId);
-                
-                if (variant) {
-                    // Simulate user behavior
-                    const behavior = Math.random();
-
-                    // 30% conversion rate
-                    if (behavior < 0.3) {
-                        this.platform.trackConversion(experimentId, userId, 'conversion', 1);
-                        
-                        // 20% make purchase
-                        if (behavior < 0.06) {
-                            const revenue = Math.random() * 50000 + 1000; // NGN 1,000 - 50,000
-                            this.platform.trackConversion(experimentId, userId, 'revenue', revenue);
-                        }
-                    }
-
-                    // Track engagement
-                    if (behavior < 0.7) {
-                        this.platform.trackConversion(experimentId, userId, 'engagement', 1);
-                    }
-                }
-            });
+            this.simulateVisitor(`user_${Math.floor(Math.random() * 100000)}`);
 
             eventCount++;
 
