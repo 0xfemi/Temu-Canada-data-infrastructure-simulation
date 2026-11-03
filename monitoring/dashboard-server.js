@@ -77,8 +77,10 @@ class BusinessMetrics {
         // Simulate business metrics based on events
         this.metrics.totalUsers += Math.floor(Math.random() * 10);
         this.metrics.activeUsers = Math.floor(processorMetrics.eventsPerSecond * 0.1);
+        // Only orders since the last update add revenue (NGN 1,000 - 6,000 each)
+        const newOrders = processorMetrics.eventsByTopic.transactionEvents - this.metrics.orders;
         this.metrics.orders = processorMetrics.eventsByTopic.transactionEvents;
-        this.metrics.revenue += processorMetrics.eventsByTopic.transactionEvents * (Math.random() * 5000 + 1000);
+        this.metrics.revenue += newOrders * (Math.random() * 5000 + 1000);
         this.metrics.conversionRate = (processorMetrics.eventsByTopic.transactionEvents / processorMetrics.eventsByTopic.userEvents) * 100 || 0;
         this.metrics.averageOrderValue = this.metrics.revenue / this.metrics.orders || 0;
 
