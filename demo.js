@@ -20,10 +20,10 @@ class DataInfrastructureDemo {
     // Run complete demo
     async runDemo() {
         console.log('\n' + '='.repeat(70));
-        console.log('TEMU NIGERIA LAUNCH - DATA INFRASTRUCTURE SIMULATION');
+        console.log('TEMU CANADA LAUNCH - DATA INFRASTRUCTURE SIMULATION');
         console.log('='.repeat(70));
         console.log('\nThis simulation demonstrates what Temu\'s data infrastructure');
-        console.log('preparation might have looked like before launching in Nigeria.\n');
+        console.log('preparation might have looked like before launching in Canada.\n');
 
         // Initialize components
         console.log('Initializing infrastructure components...');

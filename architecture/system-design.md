@@ -1,4 +1,4 @@
-# Temu Nigeria Launch: System Design
+# Temu Canada Launch: System Design
 
 ## High-Level Architecture
 
@@ -65,10 +65,11 @@
 ## Key Design Decisions
 
 ### 1. Multi-Region Architecture
-- **Primary Region**: AWS us-east-1 (US)
-- **Secondary Region**: AWS eu-west-1 (Europe)
-- **Edge Locations**: CloudFront/CDN nodes in Lagos, Abuja, Port Harcourt
+- **Primary Region**: AWS ca-central-1 (Montreal)
+- **Secondary Region**: AWS ca-west-1 (Calgary)
+- **Edge Locations**: CloudFront/CDN nodes in Toronto, Montreal, Vancouver
 - **Database Replication**: Multi-master setup with eventual consistency
+- **Data Residency**: Both regions are in Canada, so customer data never leaves the country (PIPEDA, Quebec Law 25)
 
 ### 2. Data Ingestion Strategy
 - **Event-Driven Architecture**: All user actions as events
@@ -96,12 +97,12 @@
 - **Read Replicas**: Multiple read replicas for analytics queries
 - **Caching**: Multi-layer caching (CDN → Redis → Application)
 
-## Capacity Planning (Nigeria Launch)
+## Capacity Planning (Canada Launch)
 
 ### Expected Traffic
-- **Day 1**: 500K users, 2M requests/hour
-- **Week 1**: 2M users, 10M requests/hour
-- **Month 1**: 5M users, 50M requests/hour
+- **Day 1**: 250K users, 1M requests/hour
+- **Week 1**: 1M users, 5M requests/hour
+- **Month 1**: 3M users, 25M requests/hour
 
 ### Infrastructure Requirements
 - **API Servers**: 200 instances (auto-scale 50-500)

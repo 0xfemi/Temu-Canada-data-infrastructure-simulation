@@ -260,37 +260,37 @@ class ABTestingSimulator {
         this.isRunning = false;
     }
 
-    // Simulate Nigeria launch experiments
+    // Simulate Canada launch experiments
     initializeLaunchExperiments() {
-        console.log('\nInitializing A/B tests for Nigeria launch...\n');
+        console.log('\nInitializing A/B tests for Canada launch...\n');
 
         // Experiment 1: Homepage Design
         this.platform.createExperiment(
-            'homepage_design_ng',
-            'Homepage Design - Nigeria',
-            ['Control (Current)', 'Variant A (Localized)', 'Variant B (Simplified)'],
+            'homepage_design_ca',
+            'Homepage Design - Canada',
+            ['Control (Current)', 'Variant A (Bilingual EN/FR)', 'Variant B (Simplified)'],
             ['conversion_rate', 'engagement', 'revenue']
         );
 
         // Experiment 2: Pricing Display
         this.platform.createExperiment(
-            'pricing_display_ng',
+            'pricing_display_ca',
             'Pricing Display Format',
-            ['Control (USD)', 'Variant A (NGN)', 'Variant B (Both)'],
+            ['Control (CAD)', 'Variant A (CAD, Taxes Included)', 'Variant B (CAD, Duties Included)'],
             ['conversion_rate', 'revenue']
         );
 
         // Experiment 3: Payment Methods
         this.platform.createExperiment(
-            'payment_methods_ng',
+            'payment_methods_ca',
             'Payment Method Prominence',
-            ['Control (Card First)', 'Variant A (Bank Transfer)', 'Variant B (Mobile Money)'],
+            ['Control (Card First)', 'Variant A (PayPal First)', 'Variant B (Apple Pay First)'],
             ['conversion_rate', 'revenue']
         );
 
         // Experiment 4: Marketing Campaign
         this.platform.createExperiment(
-            'marketing_creative_ng',
+            'marketing_creative_ca',
             'Marketing Creative - Instagram',
             ['Control (Product Focus)', 'Variant A (Price Focus)', 'Variant B (Social Proof)'],
             ['click_through_rate', 'conversion_rate', 'revenue']
@@ -316,7 +316,7 @@ class ABTestingSimulator {
 
                     // 20% make purchase
                     if (behavior < 0.06) {
-                        const revenue = Math.random() * 50000 + 1000; // NGN 1,000 - 50,000
+                        const revenue = Math.random() * 240 + 10; // CAD 10 - 250
                         this.platform.trackConversion(experimentId, userId, 'revenue', revenue);
                     }
                 }
@@ -402,8 +402,8 @@ class ABTestingSimulator {
                     console.log(`      Traffic: ${variant.traffic.toLocaleString()}`);
                     console.log(`      Conversions: ${variant.conversions.toLocaleString()}`);
                     console.log(`      Conversion Rate: ${variant.conversionRate.toFixed(2)}%`);
-                    console.log(`      Revenue: ₦${variant.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`);
-                    console.log(`      Avg Revenue: ₦${variant.averageRevenue.toFixed(2)}`);
+                    console.log(`      Revenue: CA$${variant.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`);
+                    console.log(`      Avg Revenue: CA$${variant.averageRevenue.toFixed(2)}`);
                     console.log(`      Engagement: ${variant.engagement.toLocaleString()} (${variant.engagementRate.toFixed(2)}%)`);
                 });
 

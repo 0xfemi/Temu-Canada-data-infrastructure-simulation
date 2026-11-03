@@ -1,8 +1,8 @@
-# Temu Nigeria Launch: Data Infrastructure Overview
+# Temu Canada Launch: Data Infrastructure Overview
 
 ## What This Simulation Shows
 
-When Temu launched in Nigeria, their marketing was everywhere - Instagram, X (Twitter), YouTube. But behind the scenes, a massive data infrastructure was being prepared to handle:
+When Temu launched in Canada, their marketing was everywhere - Facebook, Instagram, YouTube, TikTok. But behind the scenes, a massive data infrastructure was being prepared to handle:
 
 - **Millions of users** from day one
 - **Real-time analytics** for instant decision-making
@@ -94,18 +94,27 @@ All user actions generate events that flow through:
 - **Processing Workers**: Scale based on event volume
 - **Cost Optimization**: Scale down during low-traffic periods
 
-## Nigeria-Specific Considerations
+## Canada-Specific Considerations
 
 ### Geographic Optimization
-- Edge locations in Lagos, Abuja, Port Harcourt
-- CDN for static content delivery
-- Localized pricing in NGN (Nigerian Naira)
-- Payment methods: Bank transfer, mobile money
+- Primary region AWS ca-central-1 (Montreal), secondary ca-west-1 (Calgary)
+- CDN edge locations in Toronto, Montreal and Vancouver
+- Six time zones (Newfoundland to Pacific), so batch jobs run after the last region's evening peak
+
+### Data Residency and Compliance
+- Customer data stays in Canadian regions to meet PIPEDA and Quebec's Law 25
+- Consent records stored alongside marketing events for CASL (Canada's anti-spam law)
+
+### Localization
+- Bilingual English/French storefront, required for shoppers in Quebec
+- Prices in CAD, with GST/HST/PST varying by province
+- Landed-cost pricing: shoppers expect duties and taxes shown before checkout
+- Payment methods: card, PayPal, Apple Pay
 
 ### Traffic Patterns
-- Expected Day 1: 500K users, 2M requests/hour
-- Week 1: 2M users, 10M requests/hour
-- Month 1: 5M users, 50M requests/hour
+- Expected Day 1: 250K users, 1M requests/hour
+- Week 1: 1M users, 5M requests/hour
+- Month 1: 3M users, 25M requests/hour
 
 ### Infrastructure Requirements
 - 200+ API server instances (auto-scale 50-500)

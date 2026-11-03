@@ -1,16 +1,16 @@
-# Temu Nigeria Launch: Data Infrastructure Simulation
+# Temu Canada Launch: Data Infrastructure Simulation
 
 > **Note:** This is an educational simulation, not Temu's real system. It is not affiliated with or endorsed by Temu or PDD Holdings. All events, users, orders and revenue are randomly generated, and the architecture is my own reconstruction of what a launch like this might need.
 
 ![Real-time monitoring dashboard](docs/dashboard.png)
 
-*The live dashboard (`npm run dashboard`) after about 50 seconds. Every panel is computed by the project's own modules: business figures from the event stream, cost and instance counts from the auto-scaler, experiment results from the A/B testing platform, and job status from the batch processor. All A/B variants share the same 30% conversion rate, so the "significant" results in the screenshot are false positives from small early samples, the kind of result a real launch team should not act on.*
+*The live dashboard (`npm run dashboard`) after about 50 seconds. Every panel is computed by the project's own modules: business figures from the event stream, cost and instance counts from the auto-scaler, experiment results from the A/B testing platform, and job status from the batch processor. All A/B variants share the same 30% conversion rate, so any "significant" or "trending" result is a false positive from small early samples, the kind of result a real launch team should not act on.*
 
 ## Overview
 
-When Temu launched in Nigeria, everyone saw the marketing on Instagram, X and YouTube. The less visible part was the data infrastructure: handling millions of users, real-time analytics and sudden traffic spikes from day one.
+When Temu launched in Canada, most people saw the advertising on Facebook, Instagram, YouTube and TikTok. The less visible part was the data infrastructure: handling millions of users across six time zones, real-time analytics, and sudden traffic spikes from day one, while keeping customer data in Canada.
 
-This project models that infrastructure in Node.js. It generates a realistic stream of user, transaction, marketing and infrastructure events and processes it in real time. It also auto-scales simulated infrastructure, runs A/B tests on launch decisions such as NGN vs USD pricing and mobile money vs card payments, and shows everything on a live dashboard.
+This project models that infrastructure in Node.js. It generates a realistic stream of user, transaction, marketing and infrastructure events from Toronto, Montreal, Vancouver, Calgary and Ottawa, priced in Canadian dollars, and processes it in real time. It also auto-scales simulated infrastructure, runs A/B tests on Canadian launch decisions such as a bilingual English/French homepage, showing prices with taxes or duties included, and PayPal or Apple Pay vs card checkout, and shows everything on a live dashboard.
 
 ## Results From a Sample Run
 
@@ -63,7 +63,7 @@ The simulation models these components in code. It does not run actual Kafka, Fl
 - **Alerting System**: PagerDuty/DataDog for anomaly detection
 
 ### 5. Infrastructure
-- **Multi-Region Deployment**: AWS/GCP with Nigeria-specific edge locations
+- **Multi-Region Deployment**: AWS ca-central-1 (Montreal) and ca-west-1 (Calgary), keeping customer data in Canada for PIPEDA and Quebec's Law 25
 - **Auto-scaling**: Kubernetes clusters with HPA
 - **Load Balancing**: Geographic routing for optimal latency
 - **Disaster Recovery**: Multi-AZ with automated failover
@@ -92,7 +92,7 @@ Batch job steps are timed like real jobs and take minutes each (ML training take
 ## Project Structure
 
 ```
-Temu-Nigeria-data-infrastructure-simulation/
+Temu-Canada-data-infrastructure-simulation/
 ├── README.md
 ├── OVERVIEW.md
 ├── HOW_IT_WORKS.md

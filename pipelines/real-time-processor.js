@@ -64,8 +64,8 @@ class RealTimeProcessor extends EventEmitter {
         const baseProps = {
             device: ['mobile', 'desktop', 'tablet'][Math.floor(Math.random() * 3)],
             os: ['iOS', 'Android', 'Windows', 'macOS'][Math.floor(Math.random() * 4)],
-            country: 'NG', // Nigeria
-            city: ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan'][Math.floor(Math.random() * 5)]
+            country: 'CA', // Canada
+            city: ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Ottawa'][Math.floor(Math.random() * 5)]
         };
 
         switch (eventType) {
@@ -91,30 +91,30 @@ class RealTimeProcessor extends EventEmitter {
                 return {
                     ...baseProps,
                     orderId: `order_${Math.random().toString(36).substr(2, 9)}`,
-                    amount: (Math.random() * 50000).toFixed(2),
-                    currency: 'NGN',
+                    amount: (Math.random() * 240 + 10).toFixed(2), // CAD 10 - 250
+                    currency: 'CAD',
                     itemCount: Math.floor(Math.random() * 10) + 1
                 };
             case 'order.completed':
                 return {
                     ...baseProps,
                     orderId: `order_${Math.random().toString(36).substr(2, 9)}`,
-                    amount: (Math.random() * 50000).toFixed(2),
-                    currency: 'NGN',
-                    paymentMethod: ['card', 'bank_transfer', 'mobile_money'][Math.floor(Math.random() * 3)]
+                    amount: (Math.random() * 240 + 10).toFixed(2), // CAD 10 - 250
+                    currency: 'CAD',
+                    paymentMethod: ['card', 'paypal', 'apple_pay'][Math.floor(Math.random() * 3)]
                 };
             case 'ad.impression':
                 return {
                     ...baseProps,
                     campaignId: `campaign_${Math.floor(Math.random() * 100)}`,
-                    channel: ['instagram', 'x', 'youtube', 'facebook'][Math.floor(Math.random() * 4)],
+                    channel: ['instagram', 'tiktok', 'youtube', 'facebook'][Math.floor(Math.random() * 4)],
                     adId: `ad_${Math.floor(Math.random() * 1000)}`
                 };
             case 'ad.click':
                 return {
                     ...baseProps,
                     campaignId: `campaign_${Math.floor(Math.random() * 100)}`,
-                    channel: ['instagram', 'x', 'youtube', 'facebook'][Math.floor(Math.random() * 4)],
+                    channel: ['instagram', 'tiktok', 'youtube', 'facebook'][Math.floor(Math.random() * 4)],
                     ctr: (Math.random() * 5).toFixed(2) + '%'
                 };
             default:

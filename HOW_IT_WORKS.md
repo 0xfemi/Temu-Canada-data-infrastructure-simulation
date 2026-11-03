@@ -56,7 +56,7 @@ class RealTimeProcessor extends EventEmitter {
     userId: "user_12345",
     properties: {
         device: "mobile",
-        city: "Lagos",
+        city: "Toronto",
         element: "product_card",
         productId: "prod_456"
     }
@@ -194,10 +194,10 @@ class ABTestingPlatform {
 
 **Example Experiment:**
 ```
-Experiment: "Homepage Design - Nigeria"
+Experiment: "Homepage Design - Canada"
 Variants:
   - Control (Current): 50 users, 15 conversions (30%)
-  - Variant A (Localized): 52 users, 20 conversions (38.5%)
+  - Variant A (Bilingual EN/FR): 52 users, 20 conversions (38.5%)
   
 Result: Variant A has 8.5% lift, 95% confidence [YES]
 ```

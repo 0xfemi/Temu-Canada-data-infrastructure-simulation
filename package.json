@@ -1,7 +1,7 @@
 {
   "name": "temu-data-infrastructure-simulation",
   "version": "1.0.0",
-  "description": "Simulation of Temu's data infrastructure preparation for Nigeria launch",
+  "description": "Simulation of Temu's data infrastructure preparation for a Canada launch",
   "main": "index.js",
   "scripts": {
     "pipeline": "node pipelines/real-time-processor.js",
