@@ -363,7 +363,8 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true
+                maintainAspectRatio: true,
+                aspectRatio: 2
             }
         });
 
@@ -381,6 +382,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                aspectRatio: 2,
                 scales: {
                     r: {
                         beginAtZero: true,
@@ -401,7 +403,7 @@
             document.getElementById('errorRate').textContent = `${processor.errorRate.toFixed(3)}%`;
             document.getElementById('activeUsers').textContent = business.activeUsers.toLocaleString();
             document.getElementById('orders').textContent = business.orders.toLocaleString();
-            document.getElementById('revenue').textContent = `₦${business.revenue.toLocaleString()}`;
+            document.getElementById('revenue').textContent = `₦${business.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
             document.getElementById('cpuUsage').textContent = `${infrastructure.cpuUsage.toFixed(1)}%`;
             document.getElementById('cacheHitRate').textContent = `${infrastructure.cacheHitRate.toFixed(1)}%`;
 

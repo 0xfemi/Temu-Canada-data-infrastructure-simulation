@@ -119,8 +119,10 @@ io.on('connection', (socket) => {
     });
 });
 
-// Listen to processor metrics
-processor.on('metrics', (metrics) => {
+// Listen to processor metrics (the emitted payload is formatted for logging,
+// so send the dashboard the numeric version instead)
+processor.on('metrics', () => {
+    const metrics = processor.getMetrics();
     const data = {
         processor: metrics,
         infrastructure: infraMetrics.update(),
