@@ -144,7 +144,7 @@ class DataInfrastructureDemo {
         console.log(`   Kafka Brokers: ${state.instances.kafkaBrokers}`);
         console.log(`   Processing Workers: ${state.instances.processingWorkers}`);
         console.log(`   Cache Nodes: ${state.instances.cacheNodes}`);
-        console.log(`   Scaling Events: ${state.scaler?.scalingHistory?.length || 0}`);
+        console.log(`   Scaling Events: ${this.scaler.scalingHistory.length}`);
 
         console.log('\nCost Estimate:');
         console.log(`   Hourly: $${state.totalCost.hourly.toFixed(2)}`);
